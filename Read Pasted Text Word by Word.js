@@ -1,0 +1,24 @@
+document.getElementsByTagName(`html`)[0].innerHTML = ``;
+document.body.appendChild(document.createElement(`div`));
+document.addEventListener(`paste`, on_paste);
+document.body.style.fontSize = `2em`
+let text_, words, index;
+function on_paste(event)
+{
+  text_ = (event.clipboardData||window.clipboardData).getData(`text`);
+  words = text_.split(` `);
+  index = -1;
+  document.removeEventListener(`keyup`, on_keyup);
+  document.addEventListener(`keyup`, on_keyup);
+}
+function on_keyup(event)
+{
+  if(event.key == "ArrowRight" && ( index < (words.length-1) ))
+  {
+    document.getElementsByTagName(`div`)[0].innerHTML = words[++index];
+  }
+  else if(event.key == "ArrowLeft" && ( index > 0))
+  {
+    document.getElementsByTagName(`div`)[0].innerHTML = words[--index];
+  }  
+}
