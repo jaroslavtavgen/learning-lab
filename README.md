@@ -4,8 +4,6 @@
 
 How it works: you launch the html file in your browser, copy some text into clipboard, then paste this text on the html page. After you've done that you press either "Left Arrow" or "Right Arrow" and the program will be showing you one word at a time. 
 
-This is intended for editing the texts as you are able to view the text via eyes of the reader and have a better understanding of how to edit it. Practice shows that I need to use this tool for a while and for a small fraction of text - after some time of using it my brain adapt and gets the right focus which allows me to continue editing the text without using this tool. So, it is some kind of priming tool.
-
 **"Train a 4x4 Tic-Tac-Toe Neural Network.py"** is a neural network that is being trained (from scratch) how to play a 4x4 Tic-Tac-Toe as crosses and not to lose (yes, it does not attempt on winning - it's goal is not to lose). 
 
 I use this program as a prototype: if I can handle a tic-tac-toe game with a neural network it means that I understand something about neural nets:) I've managed to make the neural network lose 0-5 times per 10,000 games. 
