@@ -7,3 +7,5 @@ How it works: you launch the html file in your browser, copy some text into clip
 **"Train a 4x4 Tic-Tac-Toe Neural Network.py"** is a neural network that is being trained (from scratch) how to play a 4x4 Tic-Tac-Toe as crosses and not to lose (yes, it does not attempt on winning - it's goal is not to lose). 
 
 I use this program as a prototype: if I can handle a tic-tac-toe game with a neural network it means that I understand something about neural nets:) I've managed to make the neural network lose 0-5 times per 10,000 games. 
+
+**"Embeddings And Cosine Proximity of The Words.html":** this is my ONGOING project where I learn how cosine proximity works. The project is nowhere near finished. Be careful: it alters the clipboard :) 
