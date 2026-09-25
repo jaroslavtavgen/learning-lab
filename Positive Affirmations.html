@@ -1,0 +1,298 @@
+<body>
+<meta charset="utf-8">
+<script>
+
+let inputs = [
+	[0,5,2,4,3,1],[0,1,2,3,4,5],[7,1,2,3,4,0], [0,1,3,7,4,5], [0, 1, 2, 7, 4, 5], [0,1,2,3,6,5], [0,7,2,6,4,5], [0,6,2,7,4,5], 
+];
+
+let outputs = "01001000".match(/\d/gi).map(Number);
+
+let words = `я люблю тебя как настоящего чемпиона очень истинного`.split(` `);
+
+function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}  
+
+let div = document.createElement(`div`);
+div.id = `game`;
+document.body.appendChild(div);
+
+div = document.createElement(`div`);
+div.id = `errorDiv`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`div`);
+div.id = `phraseDiv`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`input`);
+div.id = `numbers`
+div.style.width = `300px`;
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`br`);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`input`);
+div.id = `phrase`
+div.style.width = `300px`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `OK`
+div.addEventListener(`click`, a1);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`input`);
+div.id = `generatedNumbers`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`input`);
+div.id = `rate`
+document.getElementById(`game`).appendChild(div);
+
+function isADuplicate(input, inputs) {
+
+	let input1 = input;
+
+	for ( let j = 0; j < inputs.length; j++ ) {
+	
+		let input2 = inputs[j];
+		
+		let same = true;
+		
+		for ( let k = 0; k < input1.length && same; k++ ) {
+		
+			if ( input1[k] != input2[k] ) same = false;
+		
+		}
+		if ( same ) return true;
+	}
+	return false;
+
+}
+
+for ( let i = 0; i < inputs.length; i++ ) {
+
+	let input1 = inputs[i];
+
+	for ( let j = i + 1; j < inputs.length; j++ ) {
+	
+		let input2 = inputs[j];
+		
+		let same = true;
+		
+		for ( let k = 0; k < input1.length && same; k++ ) {
+		
+			if ( input1[k] != input2[k] ) same = false;
+		
+		}
+		if ( same ) {
+		
+			inputs.splice(j, 1);
+			outputs.splice(j, 1);
+			j--;
+		
+		}
+	}
+
+}
+
+let numberOfWords = 6;
+let numberOfPeople = numberOfWords * words.length;
+let numberOfParallelUniverses = 8;
+let learningRate = 0.1;
+let numberOfEpochs = 500;
+
+function a1(event){
+
+	if ( !document.getElementById(`phrase`).value.length ) {
+	
+		generate();
+		return;
+	
+	}
+
+	let parsedWords = document.getElementById(`phrase`).value.split(` `);
+	
+	if ( parsedWords.length != numberOfWords ) {
+		document.getElementById(`generatedNumbers`).value = `неправильное количество слов`
+		return
+	}
+	
+	let vtr = [];
+	
+	for ( let i =0; i < parsedWords.length; i++ ) {
+	
+		let word = parsedWords[i];
+		
+		if ( !words.includes(word) ) {
+			document.getElementById(`generatedNumbers`).value = `слова нет в списке`
+			return;
+		}
+		
+		vtr.push ( words.indexOf(word) );
+
+	}
+	
+	if ( isADuplicate(vtr, inputs) ) document.getElementById(`generatedNumbers`).value = `повтор`
+	
+	else {
+		document.getElementById(`numbers`).value += `[${vtr.join`, `}], `
+		document.getElementById(`numbers`).focus()
+		document.getElementById(`numbers`).select()
+		document.getElementById(`generatedNumbers`).value = ``
+		document.getElementById(`phrase`).value = ``
+		navigator.clipboard.writeText(document.getElementById(`numbers`).value)
+		document.getElementById(`numbers`).value = ``	
+	}
+}
+
+
+let weights = Array.from({length:numberOfParallelUniverses * numberOfPeople + numberOfParallelUniverses},_=>Math.random () - 0.5);
+
+let biases = Array.from({length:numberOfParallelUniverses + 1},_=>0);
+
+let errors;
+
+if ( inputs.length ) {
+
+	let oneHotInputs = [];
+	
+	for ( let i = 0; i < inputs.length; i++ ) {
+	
+		oneHotInputs.push(Array.from({length:numberOfPeople},_=>0));
+		
+		for ( let j = 0; j < inputs[i].length; j++ ) {
+		
+			oneHotInputs[oneHotInputs.length-1][j * words.length + inputs[i][j]] = 1;
+		
+		}
+	
+	}
+	
+
+	for ( let attempt = 0; attempt < numberOfEpochs; attempt++ ) {
+
+		errors = 0;
+		
+		for ( let i = 0; i < inputs.length; i++ ) {
+		
+			let input = oneHotInputs[i];
+			let output = outputs[i];
+			
+			let res2 = biases[biases.length-1];
+			
+			let resultsOfTheParallelUniverses = [];
+			
+			for ( let u = 0; u < numberOfParallelUniverses; u++ ) {
+			
+				let res = biases[u];
+				
+				for ( let j = 0; j < input.length; j++ ) res += input[j] * weights [ u * numberOfPeople + j ];
+				
+				res = 1 / ( 1 + Math.exp(-res));
+				
+				resultsOfTheParallelUniverses.push(res);
+				
+				res2 += weights[numberOfParallelUniverses * numberOfPeople + u] * res;
+				   
+			}
+			res2 = 1 / ( 1 + Math.exp(-res2));
+			errors += 0.5 * ( output - res2 )**2;
+		
+			let dRes2 = res2 - output;
+
+			let dZ2 = dRes2 * res2 * (1 - res2);
+			
+			biases[biases.length-1] -= learningRate * dZ2;
+			
+			let universesDelta = [];
+			
+			for ( let u = 0; u < numberOfParallelUniverses; u++ ) {
+				
+				let oldWeight = weights [ numberOfParallelUniverses * numberOfPeople + u ];
+				
+				weights [ numberOfParallelUniverses * numberOfPeople + u ] -= learningRate * dZ2 * resultsOfTheParallelUniverses[u];
+				
+				universesDelta[u] = dZ2 * oldWeight * resultsOfTheParallelUniverses[u] * (1 - resultsOfTheParallelUniverses[u]);
+				
+				biases[u] -= learningRate * universesDelta[u];
+				
+				for ( let j =0; j < numberOfPeople; j++ ) {
+				
+					weights[u * numberOfPeople + j] -= learningRate * universesDelta[u] * input[j];
+				
+				}
+				
+			}
+		}
+		errors /= inputs.length;
+	}
+	document.getElementById(`errorDiv`).innerHTML = `errors: ${errors}<br>`
+}
+function generate () {
+
+	let bestScore = -Infinity;
+
+	let bestNumbers = -1;
+
+	let numbers = Array.from({length:words.length},(_,i)=>i);    
+
+	for ( let attempt = 0; attempt < 10000; attempt++ ) {
+
+		shuffle(numbers);
+		
+		let selectedNumbers = numbers.slice(0, numberOfWords);
+		
+		let input = Array.from({length:numberOfPeople},_=>0);
+		
+		for ( let i = 0; i < selectedNumbers.length; i++ ) {
+		
+			input [ i * words.length + selectedNumbers[i] ] = 1;
+		
+		}
+		
+		let res2 = biases[biases.length-1];
+			
+		for ( let u = 0; u < numberOfParallelUniverses; u++ ) {
+		
+			let res = biases[u];
+			
+			for ( let j = 0; j < input.length; j++ ) res += input[j] * weights [ u * numberOfPeople + j ];
+			
+			res = 1 / ( 1 + Math.exp(-res));
+			
+			res2 += weights[numberOfParallelUniverses * numberOfPeople + u] * res;
+			   
+		}
+		res2 = 1 / ( 1 + Math.exp(-res2));
+			
+		if ( res2 > bestScore){
+		
+			bestScore = res2;
+			bestNumbers = [...selectedNumbers];
+		
+		}
+
+	}
+	document.getElementById(`phraseDiv`).innerHTML = bestNumbers.map(e=>words[e]).join` ` + "<br>";		
+	document.getElementById(`numbers`).value = "[" + bestNumbers + "], ";
+	document.getElementById(`rate`).value = bestScore
+}
+generate();
+</script>
+</body> 
