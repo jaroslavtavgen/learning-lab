@@ -51,12 +51,12 @@ div.id = `refactorDiv`;
 document.getElementById(`game`).appendChild(div);
 
 div = document.createElement(`label`);
-div.textContent = `Refactor the Selected Variable With This: `;
+div.textContent = `Refactor the Selected Variable/Label With This: `;
 document.getElementById(`game`).appendChild(div);
 
 div = document.createElement(`input`);
 div.id = `refactor`;
-div.placeholder = `Выделите переменную и нажмите Enter`;
+div.placeholder = `Выделите переменную или метку и нажмите Enter`;
 div.addEventListener(`keydown`, (e) => {
   if (e.key === `Enter`) applyRefactor();
 });
@@ -122,8 +122,10 @@ createBtn("continue", `numbers`, numbers);
 createBtn("else", `numbers`, numbers);
 createBtn("false", `numbers`, numbers);
 createBtn(".includes()", `numbers`, numbers);
+createBtn(".indexOf()", `numbers`, numbers);
 createBtn(`Infinity`, `numbers`, numbers);
 createBtn(`.length`, `numbers`, numbers);
+createBtn(`.match(//gi)`, `numbers`, numbers);
 createBtn(`true`, `numbers`, numbers);
 
 // --- Отслеживание выделения ---
@@ -168,7 +170,7 @@ function applyRefactor() {
     }
   }
 
-  // 3. Заменяем все вхождения переменной в коде
+  // 3. Заменяем все вхождения метки/переменной в коде
   const escapedOld = oldName.replace(/[.*+?^${}()|[\]\\]/g, `\\$&`);
   const regex = new RegExp(`(?<![\\p{L}\\p{N}_$])${escapedOld}(?![\\p{L}\\p{N}_$])`, `gu`);
   textareaEl.value = textareaEl.value.replace(regex, newName);
@@ -225,14 +227,20 @@ function deleteLastSymbol(event) {
 }
 
 function newCycle(event) {
-  const letter = String.fromCharCode(96 + ++cycles);
+  const cycleLabel = `cycle${++cycles}`;
+  const letter = String.fromCharCode(96 + cycles);
+
+  variables.push(cycleLabel);
   variables.push(letter);
-  insertAtCursor(`for ( let ${letter} = 0; ${letter} < 10; ${letter}++ ) {\n\n}`);
+
+  insertAtCursor(`${cycleLabel}: for ( let ${letter} = 0; ${letter} < 10; ${letter}++ ) {`);
+
+  createBtn(cycleLabel, `numbers`, numbers);
   createBtn(letter, `numbers`, numbers);
 }
 
 function newIf(event) {
-  insertAtCursor(`if ( variable1 ) {\n\n}`);
+  insertAtCursor(`if ( variable1 ) `);
 }
 
 function ident(event) {
