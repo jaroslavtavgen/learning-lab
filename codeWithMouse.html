@@ -1,115 +1,151 @@
+<head>
+
+	<style>
+
+	</style>
+</head>
 <body>
 <meta charset="utf-8">
 <script>
 
 let variables = 0;
+let cycles = 0;
 
 let div = document.createElement(`div`);
-div.id = `game`
+div.id = `game`;
 document.body.appendChild(div);
 
 div = document.createElement(`textarea`);
-div.id = `code`
+div.id = `code`;
 div.style.height = `200px`;
 div.style.width = `800px`;
 document.getElementById(`game`).appendChild(div);
 
-div = document.createElement(`button`);
-div.innerHTML = `console.log`
-div.addEventListener(`click`, print);
-document.getElementById(`game`).appendChild(div);
+function createBtn(text, parentId, handler) {
+  const btn = document.createElement(`button`);
+  btn.textContent = text;
+  btn.addEventListener(`click`, handler);
+  document.getElementById(parentId).appendChild(btn);
+  return btn;
+}
 
-div = document.createElement(`button`);
-div.innerHTML = `small text`
-div.addEventListener(`click`, smallText);
-document.getElementById(`game`).appendChild(div);
-
-div = document.createElement(`button`);
-div.innerHTML = `new variable`
-div.addEventListener(`click`, newVariable);
-document.getElementById(`game`).appendChild(div);
-
-div = document.createElement(`button`);
-div.innerHTML = `semicolon`
-div.addEventListener(`click`, semicolon);
-document.getElementById(`game`).appendChild(div);
-
-div = document.createElement(`button`);
-div.innerHTML = `new line`
-div.addEventListener(`click`, newLine);
-document.getElementById(`game`).appendChild(div);
-
-div = document.createElement(`button`);
-div.innerHTML = `semicolon and a new line`
-div.addEventListener(`click`, semicolonAndANewLine);
-document.getElementById(`game`).appendChild(div);
-
+createBtn(`console.log`, `game`, print);
+createBtn(`small text`, `game`, smallText);
+createBtn(`new variable`, `game`, newVariable);
+createBtn(`new cycle`, `game`, newCycle);
+createBtn(`new if`, `game`, newIf);
+createBtn(`ident`, `game`, ident);
+createBtn(`delete last symbol`, `game`, deleteLastSymbol);
+createBtn(`semicolon`, `game`, semicolon);
+createBtn(`new line`, `game`, newLine);
+createBtn(`semicolon and a new line`, `game`, semicolonAndANewLine);
+createBtn(`copy`, `game`, copy);
+createBtn(`space`, `game`, space);
 
 div = document.createElement(`div`);
-div.id = `numbers`
+div.id = `numbers`;
 document.body.appendChild(div);
 
-for ( let i = 0; i < 10; i++ ) {
-	div = document.createElement(`button`);
-	div.innerHTML = i
-	div.addEventListener(`click`, numbers);
-	document.getElementById(`numbers`).appendChild(div);
+for (let i = 0; i < 10; i++) {
+  createBtn(i, `numbers`, numbers);
+}
+createBtn(`+`, `numbers`, numbers);
+createBtn(`-`, `numbers`, numbers);
+createBtn(` * `, `numbers`, numbers);
+createBtn(` / `, `numbers`, numbers);
+createBtn(` < `, `numbers`, numbers);
+createBtn(` > `, `numbers`, numbers);
+createBtn(`=`, `numbers`, numbers);
+createBtn(` = `, `numbers`, numbers);
+createBtn(` ( `, `numbers`, numbers);
+createBtn(` ) `, `numbers`, numbers);
+createBtn(` ()`, `numbers`, numbers);
+createBtn(" (``)", `numbers`, numbers);
+createBtn(` [ `, `numbers`, numbers);
+createBtn(` ]`, `numbers`, numbers);
+createBtn(` ], `, `numbers`, numbers);
+createBtn(`[]`, `numbers`, numbers);
+createBtn(`[], `, `numbers`, numbers);
+createBtn(` { `, `numbers`, numbers);
+createBtn(`}`, `numbers`, numbers);
+createBtn(`}, `, `numbers`, numbers);
+createBtn(`{}`, `numbers`, numbers);
+createBtn(`{}, `, `numbers`, numbers);
+createBtn(`Infinity`, `numbers`, numbers);
+createBtn(".includes()", `numbers`, numbers);
+createBtn("continue", `numbers`, numbers);
 
+// --- Вспомогательные функции ---
+
+function insertAtCursor(text) {
+  const textarea = document.getElementById(`code`);
+  textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
+  textarea.focus();
 }
 
-div = document.createElement(`button`);
-div.innerHTML = `-`
-div.addEventListener(`click`, numbers);
-document.getElementById(`numbers`).appendChild(div);
-
-div = document.createElement(`button`);
-div.innerHTML = `Infinity`
-div.addEventListener(`click`, numbers);
-document.getElementById(`numbers`).appendChild(div);
-
-
-function print(event){
-	
-	document.getElementById(`code`).value += "console.log(``);"
-	
+function print(event) {
+  insertAtCursor("console.log(``);");
 }
 
-function smallText(event){
-	
-	document.getElementById(`code`).value += ".toLowerCase()"
-	
+function smallText(event) {
+  insertAtCursor(".toLowerCase()");
 }
 
-function newVariable(event){
-	
-	document.getElementById(`code`).value += `let variable${++variables} = `
-	
+function newVariable(event) {
+  const varName = `variable${++variables}`;
+  insertAtCursor(`let ${varName} = `);
+  createBtn(varName, `numbers`, numbers);
 }
 
-function semicolon(event){
-	
-	document.getElementById(`code`).value += `;`
-	
+function semicolon(event) {
+  insertAtCursor(`;`);
 }
 
-function newLine(event){
-	
-	document.getElementById(`code`).value += `\n`
-	
+function newLine(event) {
+  insertAtCursor(`\n`);
 }
 
-function semicolonAndANewLine(event){
-	
-	document.getElementById(`code`).value += `;\n`
-	
+function semicolonAndANewLine(event) {
+  insertAtCursor(`;\n`);
 }
 
+function deleteLastSymbol(event) {
+  const textarea = document.getElementById(`code`);
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
 
-function numbers(event){
-	
-	document.getElementById(`code`).value += event.target.innerHTML
-	
+  if (start !== end) {
+    textarea.setRangeText('', start, end, 'end');
+  } else if (start > 0) {
+    textarea.setRangeText('', start - 1, start, 'end');
+  }
+  textarea.focus();
+}
+
+function newCycle(event) {
+  const letter = String.fromCharCode(96 + ++cycles);
+  insertAtCursor(`for ( let ${letter} = 0; ${letter} < 10; ${letter}++ ) {\n\n}`);
+}
+
+function newIf(event) {
+  insertAtCursor(`if ( variable1 ) {\n\n}`);
+}
+
+function ident(event) {
+  insertAtCursor(`    `);
+}
+
+function copy(event) {
+  navigator.clipboard.writeText(document.getElementById(`code`).value)
+}
+
+function space(event) {
+  insertAtCursor(` `);
+}
+
+function numbers(event) {
+  insertAtCursor(event.target.textContent);
 }
 
 </script>
-</body> 
+</body>
