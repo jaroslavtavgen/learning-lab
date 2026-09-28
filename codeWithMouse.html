@@ -1,0 +1,115 @@
+<body>
+<meta charset="utf-8">
+<script>
+
+let variables = 0;
+
+let div = document.createElement(`div`);
+div.id = `game`
+document.body.appendChild(div);
+
+div = document.createElement(`textarea`);
+div.id = `code`
+div.style.height = `200px`;
+div.style.width = `800px`;
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `console.log`
+div.addEventListener(`click`, print);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `small text`
+div.addEventListener(`click`, smallText);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `new variable`
+div.addEventListener(`click`, newVariable);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `semicolon`
+div.addEventListener(`click`, semicolon);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `new line`
+div.addEventListener(`click`, newLine);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `semicolon and a new line`
+div.addEventListener(`click`, semicolonAndANewLine);
+document.getElementById(`game`).appendChild(div);
+
+
+div = document.createElement(`div`);
+div.id = `numbers`
+document.body.appendChild(div);
+
+for ( let i = 0; i < 10; i++ ) {
+	div = document.createElement(`button`);
+	div.innerHTML = i
+	div.addEventListener(`click`, numbers);
+	document.getElementById(`numbers`).appendChild(div);
+
+}
+
+div = document.createElement(`button`);
+div.innerHTML = `-`
+div.addEventListener(`click`, numbers);
+document.getElementById(`numbers`).appendChild(div);
+
+div = document.createElement(`button`);
+div.innerHTML = `Infinity`
+div.addEventListener(`click`, numbers);
+document.getElementById(`numbers`).appendChild(div);
+
+
+function print(event){
+	
+	document.getElementById(`code`).value += "console.log(``);"
+	
+}
+
+function smallText(event){
+	
+	document.getElementById(`code`).value += ".toLowerCase()"
+	
+}
+
+function newVariable(event){
+	
+	document.getElementById(`code`).value += `let variable${++variables} = `
+	
+}
+
+function semicolon(event){
+	
+	document.getElementById(`code`).value += `;`
+	
+}
+
+function newLine(event){
+	
+	document.getElementById(`code`).value += `\n`
+	
+}
+
+function semicolonAndANewLine(event){
+	
+	document.getElementById(`code`).value += `;\n`
+	
+}
+
+
+function numbers(event){
+	
+	document.getElementById(`code`).value += event.target.innerHTML
+	
+}
+
+</script>
+</body> 
