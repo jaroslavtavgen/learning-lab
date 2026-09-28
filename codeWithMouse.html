@@ -1,15 +1,15 @@
 <head>
-
 	<style>
-
 	</style>
 </head>
 <body>
 <meta charset="utf-8">
 <script>
 
-let variables = 0;
+let numberOfVariables = 0;
 let cycles = 0;
+let variables = [];
+let selectedVariable = null;
 
 let div = document.createElement(`div`);
 div.id = `game`;
@@ -44,21 +44,42 @@ createBtn(`space`, `game`, space);
 
 div = document.createElement(`div`);
 div.id = `numbers`;
-document.body.appendChild(div);
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`div`);
+div.id = `refactorDiv`;
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`label`);
+div.textContent = `Refactor the Selected Variable With This: `;
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`input`);
+div.id = `refactor`;
+div.placeholder = `Выделите переменную и нажмите Enter`;
+div.addEventListener(`keydown`, (e) => {
+  if (e.key === `Enter`) applyRefactor();
+});
+div.addEventListener(`change`, applyRefactor);
+document.getElementById(`game`).appendChild(div);
 
 for (let i = 0; i < 10; i++) {
   createBtn(i, `numbers`, numbers);
 }
 createBtn(`+`, `numbers`, numbers);
+createBtn(` + `, `numbers`, numbers);
 createBtn(`-`, `numbers`, numbers);
+createBtn(` - `, `numbers`, numbers);
 createBtn(` * `, `numbers`, numbers);
 createBtn(` / `, `numbers`, numbers);
 createBtn(` < `, `numbers`, numbers);
 createBtn(` > `, `numbers`, numbers);
 createBtn(`=`, `numbers`, numbers);
 createBtn(` = `, `numbers`, numbers);
+createBtn(`+=`, `numbers`, numbers);
+createBtn(` += `, `numbers`, numbers);
 createBtn(` ( `, `numbers`, numbers);
-createBtn(` ) `, `numbers`, numbers);
+createBtn(` )`, `numbers`, numbers);
 createBtn(` ()`, `numbers`, numbers);
 createBtn(" (``)", `numbers`, numbers);
 createBtn(` [ `, `numbers`, numbers);
@@ -71,16 +92,71 @@ createBtn(`}`, `numbers`, numbers);
 createBtn(`}, `, `numbers`, numbers);
 createBtn(`{}`, `numbers`, numbers);
 createBtn(`{}, `, `numbers`, numbers);
-createBtn(`Infinity`, `numbers`, numbers);
-createBtn(".includes()", `numbers`, numbers);
 createBtn("continue", `numbers`, numbers);
+createBtn("else", `numbers`, numbers);
+createBtn("false", `numbers`, numbers);
+createBtn(".includes()", `numbers`, numbers);
+createBtn(`Infinity`, `numbers`, numbers);
+createBtn(`.length`, `numbers`, numbers);
+createBtn(`true`, `numbers`, numbers);
+
+// --- Отслеживание выделения ---
+
+const textareaEl = document.getElementById(`code`);
+
+function checkSelection() {
+  const selectedText = textareaEl.value.substring(textareaEl.selectionStart, textareaEl.selectionEnd).trim();
+  if (variables.includes(selectedText)) {
+    selectedVariable = selectedText;
+  }
+}
+
+textareaEl.addEventListener(`mouseup`, checkSelection);
+textareaEl.addEventListener(`keyup`, checkSelection);
+textareaEl.addEventListener(`select`, checkSelection);
+
+// --- Функция рефакторинга ---
+
+function applyRefactor() {
+  const refactorInput = document.getElementById(`refactor`);
+  const newName = refactorInput.value.trim();
+
+  if (!selectedVariable || !newName || selectedVariable === newName) {
+    return;
+  }
+
+  const oldName = selectedVariable;
+
+  // 1. Обновляем массив
+  const varIndex = variables.indexOf(oldName);
+  if (varIndex !== -1) {
+    variables[varIndex] = newName;
+  }
+
+  // 2. Обновляем кнопку в #numbers
+  const buttons = document.querySelectorAll(`#numbers button`);
+  for (const btn of buttons) {
+    if (btn.textContent === oldName) {
+      btn.textContent = newName;
+      break;
+    }
+  }
+
+  // 3. Заменяем все вхождения переменной в коде
+  const escapedOld = oldName.replace(/[.*+?^${}()|[\]\\]/g, `\\$&`);
+  const regex = new RegExp(`(?<![\\p{L}\\p{N}_$])${escapedOld}(?![\\p{L}\\p{N}_$])`, `gu`);
+  textareaEl.value = textareaEl.value.replace(regex, newName);
+
+  selectedVariable = newName;
+  refactorInput.value = ``;
+  textareaEl.focus();
+}
 
 // --- Вспомогательные функции ---
 
 function insertAtCursor(text) {
-  const textarea = document.getElementById(`code`);
-  textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
-  textarea.focus();
+  textareaEl.setRangeText(text, textareaEl.selectionStart, textareaEl.selectionEnd, 'end');
+  textareaEl.focus();
 }
 
 function print(event) {
@@ -92,7 +168,8 @@ function smallText(event) {
 }
 
 function newVariable(event) {
-  const varName = `variable${++variables}`;
+  const varName = `variable${++numberOfVariables}`;
+  variables.push(varName);
   insertAtCursor(`let ${varName} = `);
   createBtn(varName, `numbers`, numbers);
 }
@@ -110,21 +187,22 @@ function semicolonAndANewLine(event) {
 }
 
 function deleteLastSymbol(event) {
-  const textarea = document.getElementById(`code`);
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
+  const start = textareaEl.selectionStart;
+  const end = textareaEl.selectionEnd;
 
   if (start !== end) {
-    textarea.setRangeText('', start, end, 'end');
+    textareaEl.setRangeText('', start, end, 'end');
   } else if (start > 0) {
-    textarea.setRangeText('', start - 1, start, 'end');
+    textareaEl.setRangeText('', start - 1, start, 'end');
   }
-  textarea.focus();
+  textareaEl.focus();
 }
 
 function newCycle(event) {
   const letter = String.fromCharCode(96 + ++cycles);
+  variables.push(letter);
   insertAtCursor(`for ( let ${letter} = 0; ${letter} < 10; ${letter}++ ) {\n\n}`);
+  createBtn(letter, `numbers`, numbers);
 }
 
 function newIf(event) {
@@ -136,7 +214,7 @@ function ident(event) {
 }
 
 function copy(event) {
-  navigator.clipboard.writeText(document.getElementById(`code`).value)
+  navigator.clipboard.writeText(textareaEl.value);
 }
 
 function space(event) {
